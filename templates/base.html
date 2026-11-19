@@ -1,0 +1,36 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  <meta name="description" content="{{ site_tagline }}">
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("theme");
+        var dark = stored ? stored === "dark" : true;
+        document.documentElement.classList.toggle("dark", dark);
+      } catch (error) { /* keep dark default */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="{% static 'dist/styles.css' %}">
+  <script src="{% static 'js/app.js' %}" defer></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen">
+  <a href="#conteudo" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-brand-700 focus:shadow-lg dark:focus:bg-stone-900 dark:focus:text-brand-300">
+    Pular para o conteúdo
+  </a>
+
+  {% include 'components/navbar.html' %}
+
+  <main id="conteudo" class="container-page pb-16 pt-6 sm:pt-10">
+    {% include 'components/messages.html' %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include 'components/footer.html' %}
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

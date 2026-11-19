@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load ui %}
+
+{% block title %}Pizzas — painel{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <nav class="text-sm text-stone-500 dark:text-stone-400" aria-label="Trilha de navegação">
+      <a href="{% url 'dashboard:index' %}" class="hover:text-brand-700 dark:hover:text-brand-300">Painel</a>
+      <span aria-hidden="true">/</span> Pizzas
+    </nav>
+    <h1 class="mt-1 text-2xl font-bold">Pizzas</h1>
+    <p class="text-sm text-stone-500 dark:text-stone-400">
+      Sabor e preço são gravados na API pizza_drf (<code class="rounded bg-stone-200 px-1 text-xs dark:bg-stone-800">/pizzas/</code>).
+    </p>
+  </div>
+  <a href="{% url 'dashboard:product_create' %}" class="btn-primary btn-sm">Nova pizza</a>
+</div>
+
+{% if pizzas_error %}
+  <div class="mb-4 rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-200" role="alert">
+    <p class="font-medium">A API não respondeu: {{ pizzas_error }}</p>
+    <p class="mt-1 text-xs">A lista abaixo é o último espelho local. Editar e excluir precisam da API no ar.</p>
+  </div>
+{% endif %}
+
+<form method="get" class="mb-4 flex max-w-md gap-2" role="search">
+  <label for="busca-produto" class="sr-only">Buscar pizza</label>
+  <input id="busca-produto" type="search" name="q" value="{{ search }}" class="input" placeholder="Buscar por sabor">
+  <button type="submit" class="btn-secondary">Buscar</button>
+</form>
+
+<div class="card overflow-x-auto">
+  {% if products %}
+    <table class="table-base">
+      <caption class="sr-only">Pizzas do cardápio</caption>
+      <thead>
+        <tr>
+          <th scope="col">Sabor</th>
+          <th scope="col">Preço</th>
+          <th scope="col">Situação</th>
+          <th scope="col">Atualizado</th>
+          <th scope="col"><span class="sr-only">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+          <tr>
+            <td>
+              <span class="mr-2" aria-hidden="true">{{ product.emoji }}</span>
+              {% if product.is_available %}
+                <a href="{{ product.get_absolute_url }}" class="font-medium hover:text-brand-700 dark:hover:text-brand-300">{{ product.name }}</a>
+              {% else %}
+                <span class="font-medium">{{ product.name }}</span>
+              {% endif %}
+              <span class="block max-w-sm truncate text-xs text-stone-500 dark:text-stone-400" title="{{ product.description }}">{{ product.description }}</span>
+            </td>
+            <td class="whitespace-nowrap font-medium">{{ product.price|brl }}</td>
+            <td>
+              {% if product.is_linked_to_api %}
+                <span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">na API</span>
+              {% else %}
+                <span class="badge bg-stone-200 text-stone-600 dark:bg-stone-800 dark:text-stone-300">fora da API</span>
+              {% endif %}
+            </td>
+            <td class="whitespace-nowrap text-xs text-stone-500 dark:text-stone-400">{{ product.updated_at|date:"d/m/Y H:i" }}</td>
+            <td class="whitespace-nowrap text-right">
+              {% if product.api_id %}
+                <a href="{% url 'dashboard:product_update' product.api_id %}" class="btn-secondary btn-sm">Editar</a>
+                <a href="{% url 'dashboard:product_delete' product.api_id %}" class="btn-ghost btn-sm text-rose-600 dark:text-rose-400">Excluir</a>
+              {% else %}
+                <span class="text-xs text-stone-500 dark:text-stone-400">somente leitura</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="p-6 text-sm text-stone-500 dark:text-stone-400">
+      Nenhuma pizza encontrada. <a href="{% url 'dashboard:product_create' %}" class="link">Cadastrar a primeira</a>.
+    </p>
+  {% endif %}
+</div>
+
+{% include 'components/pagination.html' %}
+{% endblock %}

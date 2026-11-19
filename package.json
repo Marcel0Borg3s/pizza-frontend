@@ -1,0 +1,14 @@
+{
+  "name": "pizza-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tailwind build for the pizza_frontend Django templates.",
+  "scripts": {
+    "build:css": "tailwindcss -i ./static/src/input.css -o ./static/dist/styles.css --minify",
+    "watch:css": "tailwindcss -i ./static/src/input.css -o ./static/dist/styles.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.18",
+    "tailwindcss": "^4.1.18"
+  }
+}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load ui %}
+
+{% block title %}{{ site_name }} — cardápio{% endblock %}
+
+{% block content %}
+<section class="card mb-8 overflow-hidden">
+  <div class="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+    <div>
+      <span class="badge bg-brand-100 text-brand-800 dark:bg-brand-900/40 dark:text-brand-200">Projeto de estudo · pedidos online</span>
+      <h1 class="mt-4 text-3xl font-bold leading-tight sm:text-4xl">
+        Massa de fermentação longa,<br class="hidden sm:block"> forno a lenha e entrega no bairro.
+      </h1>
+      <p class="mt-3 max-w-xl text-stone-600 dark:text-stone-300">{{ site_tagline }}</p>
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <a href="#cardapio" class="btn-primary">Ver o cardápio</a>
+        {% if not user.is_authenticated %}
+          <a href="{% url 'accounts:register' %}" class="btn-secondary">Criar conta para pedir</a>
+        {% else %}
+          <a href="{% url 'orders:list' %}" class="btn-secondary">Meus pedidos</a>
+        {% endif %}
+      </div>
+      <p class="mt-4 text-xs text-stone-500 dark:text-stone-400">
+        Cardápio e avaliações vêm da API pizza_drf · clientes, login e pedidos ficam neste front.
+      </p>
+    </div>
+    <div class="relative hidden aspect-square max-w-xs place-items-center justify-self-center rounded-3xl bg-gradient-to-br from-brand-200 via-amber-100 to-crust-100 text-[7rem] shadow-inner dark:from-brand-900/60 dark:via-amber-900/30 dark:to-stone-900 lg:grid" aria-hidden="true">
+      🍕
+    </div>
+  </div>
+</section>
+
+<section id="cardapio" aria-labelledby="cardapio-titulo">
+  {% if api_error %}
+    <div class="card mb-4 border-rose-300 p-4 text-sm text-rose-700 dark:text-rose-300" role="alert">
+      Não foi possível atualizar o cardápio agora: {{ api_error }}
+    </div>
+  {% endif %}
+  <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 id="cardapio-titulo" class="text-2xl font-bold">Cardápio</h2>
+      <p class="text-sm text-stone-500 dark:text-stone-400">
+        {{ page_obj.paginator.count }} produto{{ page_obj.paginator.count|pluralize }} disponíve{{ page_obj.paginator.count|pluralize:"l,is" }} agora.
+      </p>
+    </div>
+
+    <form method="get" action="{% url 'catalog:home' %}" class="flex w-full gap-2 sm:max-w-md" role="search">
+      {% if active_category %}<input type="hidden" name="categoria" value="{{ active_category }}">{% endif %}
+      <label class="sr-only" for="busca">Buscar no cardápio</label>
+      <input id="busca" type="search" name="q" value="{{ search }}" placeholder="Buscar por nome ou ingrediente"
+             class="input">
+      <button type="submit" class="btn-secondary">Buscar</button>
+    </form>
+  </div>
+
+  <div class="mb-6 flex flex-wrap gap-2">
+    <a href="{% querystring categoria=None page=None %}"
+       class="badge border {% if not active_category %}border-brand-600 bg-brand-600 text-white{% else %}border-stone-300 text-stone-600 hover:border-stone-400 dark:border-stone-700 dark:text-stone-300{% endif %} px-3 py-1.5">
+      Tudo
+    </a>
+    {% for category in categories %}
+      <a href="{% querystring categoria=category.value page=None %}"
+         class="badge border px-3 py-1.5 {% if active_category == category.value %}border-brand-600 bg-brand-600 text-white{% else %}border-stone-300 text-stone-600 hover:border-stone-400 dark:border-stone-700 dark:text-stone-300{% endif %}">
+        {{ category.label }}
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if products %}
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {% for product in products %}
+        {% include 'components/product_card.html' with product=product %}
+      {% endfor %}
+    </div>
+    {% include 'components/pagination.html' %}
+  {% else %}
+    <div class="card p-10 text-center">
+      <p class="text-4xl" aria-hidden="true">🍽️</p>
+      <h3 class="mt-3 text-lg font-semibold">Nada encontrado</h3>
+      <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
+        Ajuste a busca ou escolha outra categoria.
+      </p>
+      <a href="{% url 'catalog:home' %}" class="btn-secondary mt-4">Limpar filtros</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

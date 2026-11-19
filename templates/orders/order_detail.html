@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load ui %}
+
+{% block title %}Pedido #{{ order.pk }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<nav class="mb-4 text-sm text-stone-500 dark:text-stone-400" aria-label="Trilha de navegação">
+  <a href="{% url 'orders:list' %}" class="hover:text-brand-700 dark:hover:text-brand-300">Meus pedidos</a>
+  <span aria-hidden="true">/</span>
+  <span class="text-stone-700 dark:text-stone-200">#{{ order.pk }}</span>
+</nav>
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold">Pedido #{{ order.pk }}</h1>
+    <p class="text-sm text-stone-500 dark:text-stone-400">Feito em {{ order.created_at|date:"d/m/Y H:i" }}</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="badge {{ order.status_badge_class }}">{{ order.get_status_display }}</span>
+    {% if order.can_cancel %}
+      <form method="post" action="{% url 'orders:cancel' order.pk %}" data-confirm="Cancelar este pedido?">
+        {% csrf_token %}
+        <button type="submit" class="btn-danger btn-sm">Cancelar pedido</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start">
+  <section class="card overflow-hidden" aria-labelledby="itens-titulo">
+    <h2 id="itens-titulo" class="border-b border-stone-200 px-5 py-4 text-lg font-semibold dark:border-stone-800">Itens</h2>
+    <ul class="divide-y divide-stone-200 dark:divide-stone-800">
+      {% for item in order.items.all %}
+        <li class="flex flex-wrap items-center gap-4 px-5 py-4">
+          <div class="grid h-12 w-12 place-items-center rounded-lg bg-brand-50 text-2xl dark:bg-stone-800" aria-hidden="true">{{ item.product.emoji }}</div>
+          <div class="min-w-0 flex-1">
+            <a href="{{ item.product.get_absolute_url }}" class="font-medium hover:text-brand-700 dark:hover:text-brand-300">{{ item.product_name }}</a>
+            <p class="text-sm text-stone-500 dark:text-stone-400">{{ item.quantity }}× {{ item.unit_price|brl }}</p>
+          </div>
+          <span class="font-semibold">{{ item.subtotal|brl }}</span>
+          {% if item.has_review %}
+            <span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">avaliado</span>
+          {% else %}
+            <a href="{% url 'reviews:create' item.pk %}" class="btn-secondary btn-sm">Avaliar</a>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="flex justify-between border-t border-stone-200 px-5 py-4 text-base font-bold dark:border-stone-800">
+      <span>Total</span>
+      <span>{{ order.total|brl }}</span>
+    </div>
+  </section>
+
+  <aside class="card p-5" aria-labelledby="entrega-titulo">
+    <h2 id="entrega-titulo" class="text-lg font-semibold">Entrega</h2>
+    <dl class="mt-3 space-y-2 text-sm">
+      <div>
+        <dt class="text-stone-500 dark:text-stone-400">Nome</dt>
+        <dd class="font-medium">{{ order.customer_name }}</dd>
+      </div>
+      <div>
+        <dt class="text-stone-500 dark:text-stone-400">Telefone</dt>
+        <dd class="font-medium">{{ order.phone|phone }}</dd>
+      </div>
+      <div>
+        <dt class="text-stone-500 dark:text-stone-400">Endereço</dt>
+        <dd class="font-medium">{{ order.address }}, {{ order.number }}<br>{{ order.neighborhood }} · {{ order.city }}</dd>
+      </div>
+      {% if order.notes %}
+        <div>
+          <dt class="text-stone-500 dark:text-stone-400">Observações</dt>
+          <dd class="font-medium">{{ order.notes }}</dd>
+        </div>
+      {% endif %}
+    </dl>
+    <p class="mt-4 text-xs text-stone-500 dark:text-stone-400">
+      Dados congelados no momento do pedido. Mudanças no cadastro não alteram este histórico.
+    </p>
+  </aside>
+</div>
+{% endblock %}

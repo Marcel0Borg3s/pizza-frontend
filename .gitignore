@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+db.sqlite3
+*.sqlite3
+staticfiles/
+
+# Node / Tailwind
+node_modules/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+*.log
+.DS_Store

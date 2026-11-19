@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if pizza %}Editar {{ pizza.flavor }}{% else %}Nova pizza{% endif %} — painel{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+  <nav class="text-sm text-stone-500 dark:text-stone-400" aria-label="Trilha de navegação">
+    <a href="{% url 'dashboard:index' %}" class="hover:text-brand-700 dark:hover:text-brand-300">Painel</a>
+    <span aria-hidden="true">/</span>
+    <a href="{% url 'dashboard:product_list' %}" class="hover:text-brand-700 dark:hover:text-brand-300">Pizzas</a>
+  </nav>
+
+  <h1 class="mt-1 text-2xl font-bold">{% if pizza %}Editar pizza{% else %}Nova pizza{% endif %}</h1>
+  <p class="mb-6 text-sm text-stone-500 dark:text-stone-400">
+    {% if pizza %}
+      Gravando em <code class="rounded bg-stone-200 px-1 text-xs dark:bg-stone-800">PATCH /pizzas/{{ pizza.id }}/</code>.
+    {% else %}
+      Gravando em <code class="rounded bg-stone-200 px-1 text-xs dark:bg-stone-800">POST /pizzas/</code>.
+    {% endif %}
+    O cardápio e o carrinho leem a mesma fonte.
+  </p>
+
+  <form method="post" class="card space-y-4 p-6 sm:p-8" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-200" role="alert">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="grid gap-4 sm:grid-cols-[2fr_1fr]">
+      {% include 'components/form_field.html' with field=form.flavor %}
+      {% include 'components/form_field.html' with field=form.price %}
+    </div>
+
+    {% include 'components/form_field.html' with field=form.description %}
+
+    <div class="flex items-center justify-between gap-3 border-t border-stone-200 pt-5 dark:border-stone-800">
+      <a href="{% url 'dashboard:product_list' %}" class="btn-ghost btn-sm">Cancelar</a>
+      <button type="submit" class="btn-primary">{% if pizza %}Salvar alterações{% else %}Criar pizza{% endif %}</button>
+    </div>
+  </form>
+
+  {% if pizza %}
+    <p class="mt-4 text-xs text-stone-500 dark:text-stone-400">
+      ID na API: <span class="font-mono">{{ pizza.id }}</span><br>
+      Criada em {{ pizza.created_at|date:"d/m/Y H:i" }} · atualizada em {{ pizza.updated_at|date:"d/m/Y H:i" }}
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

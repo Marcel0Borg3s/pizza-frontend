@@ -1,0 +1,16 @@
+<footer class="border-t border-stone-200/80 bg-white/60 py-8 dark:border-stone-800 dark:bg-stone-900/40">
+  <div class="container-page flex flex-col gap-4 text-sm text-stone-500 dark:text-stone-400 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="font-medium text-stone-700 dark:text-stone-200">{{ site_name }} · {{ current_year }}</p>
+      <p>{{ site_tagline }}</p>
+    </div>
+    <div class="space-y-1 sm:text-right">
+      <p>
+        Projeto de estudo ·
+        <a class="link" href="{% url 'reviews:list' %}">avaliações</a> ·
+        <a class="link" href="{% url 'accounts:register' %}">cadastro</a>
+      </p>
+      <p class="text-xs">Cardápio e avaliações servidos pela API pizza_drf · clientes e pedidos neste front.</p>
+    </div>
+  </div>
+</footer>

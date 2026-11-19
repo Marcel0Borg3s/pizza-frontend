@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load ui %}
+
+{% block title %}Finalizar pedido — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-2xl font-bold">Finalizar pedido</h1>
+  <p class="text-sm text-stone-500 dark:text-stone-400">
+    Confira o endereço de entrega. Ao confirmar, o servidor relê os preços do cardápio.
+  </p>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start">
+  <form method="post" class="card space-y-4 p-6 sm:p-8" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-200" role="alert">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% include 'components/form_field.html' with field=form.customer_name %}
+      {% include 'components/form_field.html' with field=form.phone %}
+    </div>
+    <div class="grid gap-4 sm:grid-cols-[2fr_1fr]">
+      {% include 'components/form_field.html' with field=form.address %}
+      {% include 'components/form_field.html' with field=form.number %}
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% include 'components/form_field.html' with field=form.neighborhood %}
+      {% include 'components/form_field.html' with field=form.city %}
+    </div>
+    {% include 'components/form_field.html' with field=form.notes %}
+
+    <div class="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-5 dark:border-stone-800">
+      <a href="{% url 'orders:cart' %}" class="btn-ghost btn-sm">Voltar ao carrinho</a>
+      <button type="submit" class="btn-primary">Confirmar pedido</button>
+    </div>
+  </form>
+
+  <aside class="card p-6" aria-labelledby="resumo-titulo">
+    <h2 id="resumo-titulo" class="text-lg font-semibold">Seu pedido</h2>
+    <ul class="mt-4 space-y-3 text-sm">
+      {% for line in lines %}
+        <li class="flex items-start justify-between gap-3">
+          <span>
+            <span class="font-medium">{{ line.quantity }}× {{ line.product.name }}</span>
+            <span class="block text-xs text-stone-500 dark:text-stone-400">{{ line.product.price|brl }} cada</span>
+          </span>
+          <span class="font-medium">{{ line.subtotal|brl }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="mt-4 flex justify-between border-t border-stone-200 pt-3 text-base font-bold dark:border-stone-800">
+      <span>Total</span>
+      <span>{{ total|brl }}</span>
+    </div>
+    {% if form.initial.customer_name %}
+      <p class="mt-4 rounded-lg bg-sky-50 px-3 py-2 text-xs text-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
+        Endereço pré-carregado com os dados do cliente vindos da API. Ajuste se precisar.
+      </p>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% load ui %}
+<article class="card group flex flex-col overflow-hidden transition hover:-translate-y-0.5 hover:shadow-md">
+  <a href="{{ product.get_absolute_url }}" class="relative block aspect-[4/3] overflow-hidden bg-gradient-to-br from-brand-100 via-amber-100 to-crust-100 dark:from-brand-900/50 dark:via-amber-900/30 dark:to-stone-900" aria-hidden="true" tabindex="-1">
+    {% if product.image_url %}
+      <img src="{{ product.image_url }}" alt="" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+    {% else %}
+      <span class="grid h-full w-full place-items-center text-6xl transition duration-300 group-hover:scale-110">{{ product.emoji }}</span>
+    {% endif %}
+    <span class="badge absolute left-3 top-3 bg-white/90 text-stone-700 shadow-sm dark:bg-stone-900/90 dark:text-stone-200">{{ product.category_label }}</span>
+  </a>
+
+  <div class="flex flex-1 flex-col gap-3 p-4">
+    <div class="flex items-start justify-between gap-3">
+      <h3 class="text-lg font-semibold leading-snug">
+        <a href="{{ product.get_absolute_url }}" class="hover:text-brand-700 dark:hover:text-brand-300">{{ product.name }}</a>
+      </h3>
+      <p class="whitespace-nowrap font-semibold text-brand-700 dark:text-brand-300">{{ product.price|brl }}</p>
+    </div>
+    <p class="line-clamp-3 text-sm text-stone-600 dark:text-stone-400">{{ product.description }}</p>
+
+    <div class="mt-auto flex items-center gap-2 pt-1">
+      <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="flex flex-1 items-center gap-2">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <label class="sr-only" for="qty-{{ product.pk }}">Quantidade de {{ product.name }}</label>
+        <input id="qty-{{ product.pk }}" type="number" name="quantity" value="1" min="1" max="20" inputmode="numeric"
+               class="w-16 rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-center text-sm dark:border-stone-600 dark:bg-stone-800">
+        <button type="submit" class="btn-primary btn-sm flex-1">Adicionar</button>
+      </form>
+      <a href="{{ product.get_absolute_url }}" class="btn-secondary btn-sm" aria-label="Ver detalhes de {{ product.name }}">Detalhes</a>
+    </div>
+  </div>
+</article>

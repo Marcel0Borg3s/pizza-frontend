@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes da API — painel{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <nav class="text-sm text-stone-500 dark:text-stone-400" aria-label="Trilha de navegação">
+    <a href="{% url 'dashboard:index' %}" class="hover:text-brand-700 dark:hover:text-brand-300">Painel</a>
+    <span aria-hidden="true">/</span> Clientes
+  </nav>
+  <div class="mt-1 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold">Clientes da API</h1>
+      <p class="text-sm text-stone-500 dark:text-stone-400">
+        Esta lista é lida de <code class="rounded bg-stone-200 px-1 text-xs dark:bg-stone-800">GET /clients/</code> a cada carregamento.
+      </p>
+    </div>
+    <span class="badge bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300">fonte: pizza_drf</span>
+  </div>
+</div>
+
+<form method="get" class="mb-4 flex max-w-md gap-2" role="search">
+  <label for="busca-cliente" class="sr-only">Buscar cliente</label>
+  <input id="busca-cliente" type="search" name="q" value="{{ search }}" class="input" placeholder="Nome, apelido ou telefone">
+  <button type="submit" class="btn-secondary">Buscar</button>
+</form>
+
+{% if api_error %}
+  <div class="rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-200" role="alert">
+    <p class="font-medium">Não foi possível ler a API</p>
+    <p>{{ api_error }}</p>
+    <p class="mt-1 text-xs">Verifique se o pizza_drf está ativo em {{ api_base_url }}.</p>
+  </div>
+{% else %}
+  <div class="card overflow-x-auto">
+    {% if clients %}
+      <table class="table-base">
+        <caption class="sr-only">Clientes cadastrados na API</caption>
+        <thead>
+          <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">Apelido</th>
+            <th scope="col">Telefone</th>
+            <th scope="col">Cidade</th>
+            <th scope="col">ID</th>
+            <th scope="col"><span class="sr-only">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for client in clients %}
+            <tr>
+              <td class="font-medium">{{ client.name }}</td>
+              <td>{{ client.nickname }}</td>
+              <td>{{ client.phone }}</td>
+              <td>{{ client.city }}</td>
+              <td class="font-mono text-xs text-stone-500 dark:text-stone-400" title="{{ client.id }}">{{ client.id|slice:":8" }}…</td>
+              <td class="text-right">
+                <a href="{% url 'dashboard:client_detail' client.id %}" class="btn-secondary btn-sm">Ver</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="p-6 text-sm text-stone-500 dark:text-stone-400">
+        {% if search %}Nenhum cliente corresponde a “{{ search }}”.{% else %}A API ainda não tem clientes cadastrados.{% endif %}
+      </p>
+    {% endif %}
+  </div>
+  <p class="mt-3 text-xs text-stone-500 dark:text-stone-400">Total exibido: {{ clients|length }} cliente(s).</p>
+{% endif %}
+{% endblock %}

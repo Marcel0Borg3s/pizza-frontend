@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Acesso restrito — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-lg py-10 text-center">
+  <p class="text-6xl" aria-hidden="true">🔒</p>
+  <h1 class="mt-4 text-3xl font-bold">Acesso restrito</h1>
+  <p class="mt-2 text-stone-600 dark:text-stone-300">
+    Esta área é exclusiva do dono da pizzaria. Sua conta não tem permissão para acessar.
+  </p>
+  <div class="mt-6 flex justify-center gap-3">
+    <a href="{% url 'catalog:home' %}" class="btn-primary">Voltar ao cardápio</a>
+    {% if not user.is_authenticated %}
+      <a href="{% url 'accounts:login' %}" class="btn-secondary">Entrar com outra conta</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

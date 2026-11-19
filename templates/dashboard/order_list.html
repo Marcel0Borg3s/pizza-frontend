@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load ui %}
+
+{% block title %}Pedidos — painel{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <nav class="text-sm text-stone-500 dark:text-stone-400" aria-label="Trilha de navegação">
+    <a href="{% url 'dashboard:index' %}" class="hover:text-brand-700 dark:hover:text-brand-300">Painel</a>
+    <span aria-hidden="true">/</span> Pedidos
+  </nav>
+  <h1 class="mt-1 text-2xl font-bold">Pedidos</h1>
+</div>
+
+<div class="mb-4 flex flex-wrap items-center gap-2">
+  <a href="{% url 'dashboard:order_list' %}" class="badge border px-3 py-1.5 {% if not active_status %}border-brand-600 bg-brand-600 text-white{% else %}border-stone-300 text-stone-600 dark:border-stone-700 dark:text-stone-300{% endif %}">Todos</a>
+  {% for value, label in statuses %}
+    <a href="{% querystring status=value page=None %}" class="badge border px-3 py-1.5 {% if active_status == value %}border-brand-600 bg-brand-600 text-white{% else %}border-stone-300 text-stone-600 dark:border-stone-700 dark:text-stone-300{% endif %}">{{ label }}</a>
+  {% endfor %}
+
+  <form method="get" class="ml-auto flex gap-2" role="search">
+    {% if active_status %}<input type="hidden" name="status" value="{{ active_status }}">{% endif %}
+    <label for="busca-pedido" class="sr-only">Buscar por cliente</label>
+    <input id="busca-pedido" type="search" name="q" value="{{ search }}" class="input w-48" placeholder="Cliente">
+    <button type="submit" class="btn-secondary btn-sm">Buscar</button>
+  </form>
+</div>
+
+<div class="card overflow-x-auto">
+  {% if orders %}
+    <table class="table-base">
+      <caption class="sr-only">Pedidos recebidos</caption>
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Cliente</th>
+          <th scope="col">Itens</th>
+          <th scope="col">Total</th>
+          <th scope="col">Recebido</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td class="font-mono text-xs">{{ order.pk }}</td>
+            <td>
+              <p class="font-medium">{{ order.customer_name }}</p>
+              <p class="text-xs text-stone-500 dark:text-stone-400">{{ order.neighborhood }} · {{ order.phone|phone }}</p>
+            </td>
+            <td>{{ order.total_items }}</td>
+            <td class="whitespace-nowrap font-medium">{{ order.total|brl }}</td>
+            <td class="whitespace-nowrap text-xs">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+            <td>
+              <form method="post" action="{% url 'dashboard:order_status' order.pk %}" class="flex items-center gap-2">
+                {% csrf_token %}
+                <label class="sr-only" for="status-{{ order.pk }}">Status do pedido {{ order.pk }}</label>
+                <select id="status-{{ order.pk }}" name="status" class="input w-44 py-1 text-xs">
+                  {% for value, label in statuses %}
+                    <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn-secondary btn-sm">Salvar</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="p-6 text-sm text-stone-500 dark:text-stone-400">Nenhum pedido nesse filtro.</p>
+  {% endif %}
+</div>
+
+{% include 'components/pagination.html' %}
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load ui %}
+
+{% block title %}{{ product.name }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<nav class="mb-4 text-sm text-stone-500 dark:text-stone-400" aria-label="Trilha de navegação">
+  <a href="{% url 'catalog:home' %}" class="hover:text-brand-700 dark:hover:text-brand-300">Cardápio</a>
+  <span aria-hidden="true">/</span>
+  <span class="text-stone-700 dark:text-stone-200">{{ product.name }}</span>
+</nav>
+
+<article class="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+  <div class="card overflow-hidden">
+    <div class="grid aspect-[4/3] place-items-center bg-gradient-to-br from-brand-100 via-amber-100 to-crust-100 text-[8rem] dark:from-brand-900/50 dark:via-amber-900/30 dark:to-stone-900" aria-hidden="true">
+      {% if product.image_url %}
+        <img src="{{ product.image_url }}" alt="" class="h-full w-full object-cover">
+      {% else %}
+        {{ product.emoji }}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-4">
+    <div>
+      <span class="badge bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300">{{ product.category_label }}</span>
+      <h1 class="mt-3 text-3xl font-bold">{{ product.name }}</h1>
+      <div class="mt-2 flex items-center gap-3 text-sm text-stone-500 dark:text-stone-400">
+        {% if rating.average %}
+          {% stars rating.average %}
+          <span>{{ rating.average }} · </span>
+        {% endif %}
+        <span>{{ rating.count }} {% if rating.count == 1 %}avaliação{% else %}avaliações{% endif %}</span>
+      </div>
+    </div>
+
+    <p class="text-stone-600 dark:text-stone-300">{{ product.description }}</p>
+
+    <p class="text-3xl font-bold text-brand-700 dark:text-brand-300">{{ product.price|brl }}</p>
+
+    <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="flex flex-wrap items-end gap-3">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <div class="w-24">
+        <label for="quantity" class="label">Qtd.</label>
+        <input id="quantity" type="number" name="quantity" value="1" min="1" max="20" inputmode="numeric" class="input text-center">
+      </div>
+      <button type="submit" class="btn-primary">Adicionar ao carrinho</button>
+      <a href="{% url 'orders:cart' %}" class="btn-secondary">Ver carrinho</a>
+    </form>
+
+    <p class="text-xs text-stone-500 dark:text-stone-400">
+      Sabor e preço vêm da API pizza_drf
+      <code class="rounded bg-stone-200 px-1 dark:bg-stone-800">/pizzas/</code>.
+      O carrinho guarda o preço do momento do pedido.
+    </p>
+  </div>
+</article>
+
+<section class="mt-10" aria-labelledby="avaliacoes-titulo">
+  <div class="mb-4 flex items-end justify-between gap-4">
+    <div>
+      <h2 id="avaliacoes-titulo" class="text-xl font-bold">Avaliações deste produto</h2>
+      <p class="text-sm text-stone-500 dark:text-stone-400">Visíveis para todos os visitantes.</p>
+    </div>
+    <a href="{% url 'reviews:list' %}" class="btn-ghost btn-sm">Todas as avaliações</a>
+  </div>
+
+  {% if api_error %}
+    <div class="card mb-4 border-rose-300 p-4 text-sm text-rose-700 dark:text-rose-300" role="alert">
+      Não foi possível carregar as avaliações agora: {{ api_error }}
+    </div>
+  {% endif %}
+
+  {% if reviews %}
+    <ul class="grid gap-4 sm:grid-cols-2">
+      {% for review in reviews %}
+        <li class="card p-4">
+          <div class="flex items-center justify-between gap-3">
+            <p class="font-medium">{{ review.author_display }}</p>
+            {% stars review.rating %}
+          </div>
+          <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">{{ review.comment }}</p>
+          {% if review.created_at %}
+            <p class="mt-2 text-xs text-stone-400 dark:text-stone-500">{{ review.created_at|date:"d/m/Y" }}</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="card p-6 text-sm text-stone-500 dark:text-stone-400">
+      Ainda não há avaliações. Quem comprar esta pizza pode avaliar em “Meus pedidos”.
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

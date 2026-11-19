@@ -1,0 +1,16 @@
+{% if messages %}
+  <div class="mb-6 space-y-2" role="status" aria-live="polite">
+    {% for message in messages %}
+      <div class="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm
+        {% if message.tags == 'success' %}border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200
+        {% elif message.tags == 'error' %}border-rose-300 bg-rose-50 text-rose-900 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-200
+        {% elif message.tags == 'warning' %}border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-200
+        {% else %}border-sky-300 bg-sky-50 text-sky-900 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-200{% endif %}">
+        <span aria-hidden="true">
+          {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}⛔{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+        </span>
+        <p>{{ message }}</p>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load ui %}
+
+{% block title %}Carrinho — {{ site_name }}{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold">Carrinho</h1>
+<p class="mb-6 text-sm text-stone-500 dark:text-stone-400">
+  Os preços são recalculados no servidor ao finalizar o pedido.
+</p>
+
+{% if lines %}
+  <div class="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+    <ul class="space-y-3">
+      {% for line in lines %}
+        <li class="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+          <div class="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-100 to-amber-100 text-3xl dark:from-brand-900/50 dark:to-stone-900" aria-hidden="true">
+            {% if line.product.image_url %}
+              <img src="{{ line.product.image_url }}" alt="" class="h-full w-full rounded-xl object-cover">
+            {% else %}
+              {{ line.product.emoji }}
+            {% endif %}
+          </div>
+
+          <div class="min-w-0 flex-1">
+            <a href="{{ line.product.get_absolute_url }}" class="font-semibold hover:text-brand-700 dark:hover:text-brand-300">{{ line.product.name }}</a>
+            <p class="text-sm text-stone-500 dark:text-stone-400">{{ line.product.price|brl }} cada</p>
+          </div>
+
+          <form method="post" class="flex items-center gap-2">
+            {% csrf_token %}
+            <label class="sr-only" for="qty-{{ line.product.pk }}">Quantidade de {{ line.product.name }}</label>
+            <input id="qty-{{ line.product.pk }}" type="number" name="quantity" value="{{ line.quantity }}" min="0" max="20" inputmode="numeric"
+                   class="w-16 rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-center text-sm dark:border-stone-600 dark:bg-stone-800">
+            <button type="submit" formaction="{% url 'orders:cart_update' line.product.pk %}" class="btn-secondary btn-sm">Atualizar</button>
+            <button type="submit" formaction="{% url 'orders:cart_remove' line.product.pk %}" class="btn-ghost btn-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40">Remover</button>
+          </form>
+
+          <p class="text-right font-semibold sm:w-24">{{ line.subtotal|brl }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <aside class="card p-6" aria-labelledby="resumo-titulo">
+      <h2 id="resumo-titulo" class="text-lg font-semibold">Resumo</h2>
+      <dl class="mt-4 space-y-2 text-sm">
+        <div class="flex justify-between">
+          <dt class="text-stone-500 dark:text-stone-400">Itens</dt>
+          <dd>{{ cart_count }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-stone-500 dark:text-stone-400">Subtotal</dt>
+          <dd>{{ total|brl }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-stone-500 dark:text-stone-400">Entrega</dt>
+          <dd class="text-stone-500 dark:text-stone-400">combinada no contato</dd>
+        </div>
+        <div class="flex justify-between border-t border-stone-200 pt-3 text-base font-bold dark:border-stone-800">
+          <dt>Total</dt>
+          <dd>{{ total|brl }}</dd>
+        </div>
+      </dl>
+
+      {% if user.is_authenticated %}
+        <a href="{% url 'orders:checkout' %}" class="btn-primary mt-5 w-full">Finalizar pedido</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}?next={% url 'orders:checkout' %}" class="btn-primary mt-5 w-full">Entrar para finalizar</a>
+        <p class="mt-2 text-center text-xs text-stone-500 dark:text-stone-400">
+          Pedidos são visíveis apenas para clientes logados.
+        </p>
+      {% endif %}
+      <a href="{% url 'catalog:home' %}" class="btn-ghost mt-2 w-full">Continuar escolhendo</a>
+    </aside>
+  </div>
+{% else %}
+  <div class="card p-10 text-center">
+    <p class="text-5xl" aria-hidden="true">🛒</p>
+    <h2 class="mt-4 text-lg font-semibold">Carrinho vazio</h2>
+    <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">Escolha uma pizza no cardápio para começar.</p>
+    <a href="{% url 'catalog:home' %}" class="btn-primary mt-5">Ver cardápio</a>
+  </div>
+{% endif %}
+{% endblock %}

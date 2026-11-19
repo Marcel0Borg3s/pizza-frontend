@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load ui %}
+
+{% block title %}Painel do dono — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <p class="text-sm font-medium text-brand-700 dark:text-brand-300">Área restrita</p>
+    <h1 class="text-2xl font-bold">Painel do dono</h1>
+    <p class="text-sm text-stone-500 dark:text-stone-400">Pizzas na API, pedidos e o consumo da API em um só lugar.</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'dashboard:product_create' %}" class="btn-primary btn-sm">Nova pizza</a>
+    <a href="{% url 'dashboard:client_list' %}" class="btn-secondary btn-sm">Clientes da API</a>
+  </div>
+</div>
+
+<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <div class="card p-5">
+    <p class="text-sm text-stone-500 dark:text-stone-400">Pizzas na API</p>
+    <p class="mt-2 text-3xl font-bold">{{ products_count }}</p>
+    <a href="{% url 'dashboard:product_list' %}" class="mt-2 inline-block text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">gerenciar</a>
+  </div>
+  <div class="card p-5">
+    <p class="text-sm text-stone-500 dark:text-stone-400">Pedidos</p>
+    <p class="mt-2 text-3xl font-bold">{{ orders_count }}</p>
+    <a href="{% url 'dashboard:order_list' %}" class="mt-2 inline-block text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">ver todos</a>
+  </div>
+  <div class="card p-5">
+    <p class="text-sm text-stone-500 dark:text-stone-400">Aguardando</p>
+    <p class="mt-2 text-3xl font-bold text-amber-600 dark:text-amber-400">{{ pending_orders }}</p>
+    <a href="{% url 'dashboard:order_list' %}?status=pending" class="mt-2 inline-block text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">confirmar</a>
+  </div>
+  <div class="card p-5">
+    <p class="text-sm text-stone-500 dark:text-stone-400">Avaliações na API</p>
+    <p class="mt-2 text-3xl font-bold">{{ reviews_count }}</p>
+    <a href="{% url 'reviews:list' %}" class="mt-2 inline-block text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">ler</a>
+  </div>
+</div>
+
+{% if pizzas_error or reviews_error %}
+  <div class="mt-4 rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-200" role="alert">
+    {% if pizzas_error %}<p>Cardápio: {{ pizzas_error }}</p>{% endif %}
+    {% if reviews_error %}<p>Avaliações: {{ reviews_error }}</p>{% endif %}
+  </div>
+{% endif %}
+
+<div class="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+  <section class="card p-6" aria-labelledby="api-titulo">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h2 id="api-titulo" class="text-lg font-semibold">Consumo da API pizza_drf</h2>
+        <p class="text-sm text-stone-500 dark:text-stone-400">Chamadas feitas pelo servidor, nunca pelo navegador.</p>
+      </div>
+      <span class="badge {% if api_health.ok %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300{% else %}bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300{% endif %}">
+        {% if api_health.ok %}online{% else %}offline{% endif %}
+      </span>
+    </div>
+
+    <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+      <div class="rounded-lg bg-stone-100 p-3 dark:bg-stone-800/60">
+        <dt class="text-xs text-stone-500 dark:text-stone-400">Latência do health check</dt>
+        <dd class="mt-1 font-semibold">{{ api_health.latency_ms }} ms</dd>
+      </div>
+      <div class="rounded-lg bg-stone-100 p-3 dark:bg-stone-800/60">
+        <dt class="text-xs text-stone-500 dark:text-stone-400">Clientes na API</dt>
+        <dd class="mt-1 font-semibold">{{ api_health.clients_count }}</dd>
+      </div>
+    </dl>
+
+    {% if api_health.error %}
+      <p class="mt-3 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-200" role="alert">
+        {{ api_health.error }}
+      </p>
+      <p class="mt-2 text-xs text-stone-500 dark:text-stone-400">
+        Confira se o pizza_drf está rodando em <code class="rounded bg-stone-200 px-1 dark:bg-stone-800">{{ api_base_url }}</code>.
+      </p>
+    {% endif %}
+
+    <table class="table-base mt-5">
+      <caption class="sr-only">Endpoints consumidos</caption>
+      <thead>
+        <tr><th scope="col">Método</th><th scope="col">Endpoint</th><th scope="col">Uso</th></tr>
+      </thead>
+      <tbody>
+        {% for endpoint in endpoints %}
+          <tr>
+            <td><span class="badge bg-stone-100 font-mono text-stone-700 dark:bg-stone-800 dark:text-stone-200">{{ endpoint.method }}</span></td>
+            <td class="font-mono text-xs">{{ endpoint.path }}</td>
+            <td class="text-stone-600 dark:text-stone-400">{{ endpoint.use }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card p-6" aria-labelledby="chamadas-titulo">
+    <h2 id="chamadas-titulo" class="text-lg font-semibold">Últimas chamadas</h2>
+    <p class="text-sm text-stone-500 dark:text-stone-400">Sem corpos de requisição, apenas método, rota, status e tempo.</p>
+
+    {% if recent_calls %}
+      <table class="table-base mt-4">
+        <caption class="sr-only">Chamadas recentes à API</caption>
+        <thead>
+          <tr><th scope="col">Método</th><th scope="col">Rota</th><th scope="col">Status</th><th scope="col">ms</th></tr>
+        </thead>
+        <tbody>
+          {% for call in recent_calls %}
+            <tr>
+              <td class="font-mono text-xs">{{ call.method }}</td>
+              <td class="max-w-[9rem] truncate font-mono text-xs" title="{{ call.path }}">{{ call.path }}</td>
+              <td>
+                <span class="badge {% if call.status_code and call.status_code < 400 %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300{% else %}bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300{% endif %}">
+                  {{ call.status_code|default:"erro" }}
+                </span>
+              </td>
+              <td class="text-xs">{{ call.elapsed_ms }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="mt-4 text-sm text-stone-500 dark:text-stone-400">
+        Nenhuma chamada desde que o servidor iniciou. Abra “Clientes da API” para ver o consumo acontecer.
+      </p>
+    {% endif %}
+
+    <a href="{% url 'dashboard:client_list' %}" class="btn-secondary btn-sm mt-4">Ver clientes (GET /clients/)</a>
+  </section>
+</div>
+
+<section class="mt-6 card p-6" aria-labelledby="reviews-produto-titulo">
+  <h2 id="reviews-produto-titulo" class="text-lg font-semibold">Produtos mais avaliados</h2>
+  {% if reviews_per_product %}
+    <ul class="mt-3 flex flex-wrap gap-2">
+      {% for row in reviews_per_product %}
+        <li class="badge bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200">{{ row.name }} · {{ row.total }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">Sem avaliações ainda.</p>
+  {% endif %}
+</section>
+{% endblock %}

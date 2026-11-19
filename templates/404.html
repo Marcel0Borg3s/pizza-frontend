@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Página não encontrada — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-lg py-10 text-center">
+  <p class="text-6xl" aria-hidden="true">🍕</p>
+  <h1 class="mt-4 text-3xl font-bold">Esta fatia não existe</h1>
+  <p class="mt-2 text-stone-600 dark:text-stone-300">
+    A página que você tentou abrir saiu do forno ou nunca existiu.
+  </p>
+  <a href="{% url 'catalog:home' %}" class="btn-primary mt-6">Voltar ao cardápio</a>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu perfil — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold">Meu perfil</h1>
+      <p class="text-sm text-stone-500 dark:text-stone-400">Seus dados de cliente e o vínculo com a API.</p>
+    </div>
+    <a href="{% url 'orders:list' %}" class="btn-secondary btn-sm">Meus pedidos ({{ orders_count }})</a>
+  </div>
+
+  {% if api_error %}
+    <div class="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-200" role="alert">
+      <p class="font-medium">API indisponível agora</p>
+      <p>{{ api_error }}</p>
+      <p class="mt-1 text-xs">A página continua funcionando com os dados locais.</p>
+    </div>
+  {% elif not remote_client %}
+    <div class="rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300">
+      Esta conta não tem vínculo com um cliente da API. Contas criadas pelo formulário de cadastro têm esse vínculo;
+      contas de operação (superusuário) não.
+    </div>
+  {% endif %}
+
+  <div class="grid gap-5 md:grid-cols-2">
+    <section class="card p-6" aria-labelledby="conta-titulo">
+      <h2 id="conta-titulo" class="text-lg font-semibold">Conta local</h2>
+      <dl class="mt-4 space-y-3 text-sm">
+        <div class="flex justify-between gap-4">
+          <dt class="text-stone-500 dark:text-stone-400">Apelido</dt>
+          <dd class="font-medium">{{ user.username }}</dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-stone-500 dark:text-stone-400">Nome</dt>
+          <dd class="font-medium">{{ user.get_full_name|default:"—" }}</dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-stone-500 dark:text-stone-400">Desde</dt>
+          <dd class="font-medium">{{ user.date_joined|date:"d/m/Y" }}</dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-stone-500 dark:text-stone-400">Perfil</dt>
+          <dd class="font-medium">{% if user.is_staff %}Dono / operação{% else %}Cliente{% endif %}</dd>
+        </div>
+      </dl>
+      {% if user.is_staff %}
+        <a href="{% url 'dashboard:index' %}" class="btn-primary btn-sm mt-5">Abrir painel do dono</a>
+      {% endif %}
+    </section>
+
+    <section class="card p-6" aria-labelledby="api-titulo">
+      <div class="flex items-center justify-between gap-2">
+        <h2 id="api-titulo" class="text-lg font-semibold">Cliente na API</h2>
+        <span class="badge {% if remote_client %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300{% else %}bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300{% endif %}">
+          {% if remote_client %}sincronizado{% else %}sem vínculo{% endif %}
+        </span>
+      </div>
+
+      {% if remote_client %}
+        <dl class="mt-4 space-y-3 text-sm">
+          <div class="flex justify-between gap-4">
+            <dt class="text-stone-500 dark:text-stone-400">ID</dt>
+            <dd class="max-w-[60%] truncate font-mono text-xs" title="{{ remote_client.id }}">{{ remote_client.id }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-stone-500 dark:text-stone-400">Nome</dt>
+            <dd class="font-medium">{{ remote_client.name }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-stone-500 dark:text-stone-400">Telefone</dt>
+            <dd class="font-medium">{{ remote_client.phone }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-stone-500 dark:text-stone-400">Endereço</dt>
+            <dd class="text-right font-medium">{{ remote_client.address }}, {{ remote_client.number }}<br>{{ remote_client.neighborhood }} · {{ remote_client.city }}</dd>
+          </div>
+        </dl>
+        <p class="mt-4 text-xs text-stone-500 dark:text-stone-400">
+          Estes dados vêm de <code class="rounded bg-stone-200 px-1 dark:bg-stone-800">GET /clients/{{ remote_client.id }}/</code>, lidos pelo servidor.
+        </p>
+      {% elif profile and profile.client_id %}
+        <p class="mt-4 text-sm text-stone-500 dark:text-stone-400">
+          O vínculo existe ({{ profile.client_id }}), mas a API não devolveu os dados agora.
+        </p>
+      {% else %}
+        <p class="mt-4 text-sm text-stone-500 dark:text-stone-400">
+          Nenhum cliente da API vinculado a esta conta.
+        </p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

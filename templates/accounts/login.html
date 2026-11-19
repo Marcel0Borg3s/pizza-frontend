@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Entrar — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md">
+  <div class="card p-6 sm:p-8">
+    <h1 class="text-2xl font-bold">Entrar</h1>
+    <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
+      Use o apelido criado no cadastro. Pedidos ficam disponíveis apenas para quem está logado.
+    </p>
+
+    {% if form.non_field_errors %}
+      <div class="mt-4 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-200" role="alert">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="mt-6 space-y-4" novalidate>
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      {% include 'components/form_field.html' with field=form.username %}
+      {% include 'components/form_field.html' with field=form.password %}
+      <button type="submit" class="btn-primary w-full">Entrar</button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-stone-500 dark:text-stone-400">
+      Ainda não tem conta?
+      <a href="{% url 'accounts:register' %}" class="link">Criar conta</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

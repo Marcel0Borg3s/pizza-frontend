@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@source "../../templates";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: ui-serif, Georgia, "Times New Roman", serif;
+
+  --color-brand-50: #fff5f2;
+  --color-brand-100: #ffe7de;
+  --color-brand-200: #ffcbba;
+  --color-brand-300: #ffa88d;
+  --color-brand-400: #fb7a55;
+  --color-brand-500: #ef5230;
+  --color-brand-600: #d13a1b;
+  --color-brand-700: #ad2c14;
+  --color-brand-800: #8c2714;
+  --color-brand-900: #6f2415;
+
+  --color-crust-50: #fdf8f3;
+  --color-crust-100: #f6ece1;
+  --color-crust-900: #1d1410;
+  --color-crust-950: #140d0a;
+
+  --radius-card: 1rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-crust-50 text-stone-800 antialiased dark:bg-crust-950 dark:text-stone-100;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-crust-50 dark:ring-offset-crust-950;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold
+      transition focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 text-white shadow-sm shadow-brand-900/20 hover:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply border border-stone-300 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50
+      dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800;
+  }
+
+  .btn-ghost {
+    @apply text-stone-600 hover:bg-stone-200/70 dark:text-stone-300 dark:hover:bg-stone-800;
+  }
+
+  .btn-danger {
+    @apply bg-rose-600 text-white hover:bg-rose-700;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .card {
+    @apply rounded-2xl border border-stone-200/80 bg-white shadow-sm
+      dark:border-stone-800 dark:bg-stone-900/70;
+  }
+
+  .input {
+    @apply block w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900
+      shadow-sm transition placeholder:text-stone-400 focus:border-brand-500 focus:outline-none
+      focus:ring-2 focus:ring-brand-500/40 dark:border-stone-600 dark:bg-stone-800
+      dark:text-stone-100 dark:placeholder:text-stone-500;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .link {
+    @apply font-medium text-brand-700 underline-offset-4 hover:underline dark:text-brand-300;
+  }
+
+  .nav-link {
+    @apply rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 transition
+      hover:bg-stone-200/70 hover:text-stone-900 dark:text-stone-300 dark:hover:bg-stone-800
+      dark:hover:text-white;
+  }
+
+  .nav-link-active {
+    @apply bg-brand-100 text-brand-800 dark:bg-brand-900/40 dark:text-brand-200;
+  }
+
+  .label {
+    @apply mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300;
+  }
+
+  .table-base {
+    @apply w-full text-left text-sm;
+  }
+
+  .table-base thead {
+    @apply text-xs uppercase tracking-wide text-stone-500 dark:text-stone-400;
+  }
+
+  .table-base th {
+    @apply px-4 py-3 font-semibold;
+  }
+
+  .table-base td {
+    @apply border-t border-stone-200/80 px-4 py-3 dark:border-stone-800;
+  }
+}

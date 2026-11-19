@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Avaliar {{ order_item.product.name }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-xl">
+  <div class="mb-6">
+    <p class="text-sm text-stone-500 dark:text-stone-400">Pedido #{{ order_item.order.pk }}</p>
+    <h1 class="text-2xl font-bold">Avaliar {{ order_item.product.name }}</h1>
+    <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
+      Sua avaliação fica visível para todos os visitantes.
+    </p>
+  </div>
+
+  <form method="post" class="card space-y-5 p-6 sm:p-8" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-200" role="alert">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <fieldset>
+      <legend class="label">Nota</legend>
+      <div class="flex flex-wrap gap-4">
+        {% for radio in form.rating %}
+          <label class="flex items-center gap-2 text-sm">
+            {{ radio.tag }}
+            <span>{{ radio.choice_label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      {% for error in form.rating.errors %}
+        <p class="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">{{ error }}</p>
+      {% endfor %}
+    </fieldset>
+
+    {% include 'components/form_field.html' with field=form.comment %}
+
+    <div class="flex items-center justify-between gap-3 border-t border-stone-200 pt-5 dark:border-stone-800">
+      <a href="{% url 'orders:detail' order_item.order.pk %}" class="btn-ghost btn-sm">Voltar</a>
+      <button type="submit" class="btn-primary">Publicar avaliação</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
