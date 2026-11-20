@@ -79,7 +79,8 @@ uv sync
 
 # 2. variáveis de ambiente
 cp .env.example .env
-# edite .env: DJANGO_SECRET_KEY (obrigatória) e DEMO_OWNER_PASSWORD
+# edite .env: DJANGO_SECRET_KEY (obrigatória), DEMO_OWNER_PASSWORD
+# e, para PostgreSQL, DB_NAME/DB_USER/DB_PASSWORD/DB_HOST/DB_PORT
 
 # 3. CSS: o build já está em static/dist/, rode só se mexer no Tailwind
 npm install
@@ -106,6 +107,37 @@ o comando é idempotente):
 
 ```bash
 uv run python manage.py seed_catalog
+```
+
+### Banco de dados
+
+O front usa **SQLite** por padrão e **PostgreSQL** quando `DB_NAME` está preenchido no
+`.env`. Para rodar em PostgreSQL:
+
+```bash
+createdb -U postgres pizza_frontend
+
+# no .env:
+# DB_NAME=pizza_frontend
+# DB_USER=postgres
+# DB_PASSWORD=...
+# DB_HOST=127.0.0.1
+# DB_PORT=5432
+
+uv run python manage.py migrate
+```
+
+Os dados locais (usuários, produtos espelhados, pedidos e avaliações) ficam nesse banco.
+Trocar de banco não mexe na API: ela continua sendo a fonte de verdade do cardápio e das
+avaliações.
+
+Para levar dados de um `db.sqlite3` antigo para o PostgreSQL, use `dumpdata` no banco de
+origem (sem `DB_NAME` no `.env`) e `loaddata` no destino (com `DB_NAME`):
+
+```bash
+uv run python manage.py dumpdata auth.user accounts.profile catalog.product \
+  orders.order orders.orderitem reviews.review --indent 2 -o dump.json
+uv run python manage.py loaddata dump.json
 ```
 
 ## APIs consumidas hoje
